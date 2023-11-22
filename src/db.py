@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import re
 
-path = 'C:\\Users\\User\\Documents\\mju\\2023 2학기\\캡스톤 디자인\\CBIR'
+path = 'C:\\Users\\User\\githubStudy\\CBIR'
 os.chdir(path)
 
 db_dir = 'database'
