@@ -32,8 +32,9 @@ from torchvision import models
 from torchvision.models.vgg import VGG
 
 #cache
-categories = ['long sleeve dress', 'long sleeve outwear', 'long sleeve top', 'short sleeve dress', 'short sleeve outwear',
-              'short sleeve top', 'shorts', 'skirt', 'sling dress', 'sling', 'trousers', 'vest dress', 'vest']
+categories = ['long_sleeve_dress', 'long_sleeve_outwear', 'long_sleeve_top', 'short_sleeve_dress', 'short_sleeve_outwear',
+             'short_sleeve_top', 'shorts', 'skirt', 'sling_dress', 'sling', 'trousers', 'vest_dress', 'vest']
+
 
 os.makedirs('cache', exist_ok=True)
 
