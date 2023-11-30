@@ -152,7 +152,7 @@ class Gabor(object):
             samples = []
             samples_img = []
 
-            fin_sample = []
+        fin_sample = []
         for img in data_img:
             if img in samples_img:
                 sample = next((sample for sample in samples if sample['img'] == img), None)
@@ -174,8 +174,6 @@ class Gabor(object):
                             'img':  d_img, 
                             'hist': d_hist
                         })
-
-                print(d_img)
 
         sample_ca = [item for item in fin_sample if item['img'] != data['img'][0]] #db data in cache
 
@@ -431,6 +429,7 @@ class VGGNetFeat(object):
             samples_img = []
 
         fin_sample = []
+
         for img in data_img:
             if img in samples_img:
                 sample = next((sample for sample in samples if sample['img'] == img), None)
@@ -486,17 +485,17 @@ if __name__ == "__main__":
     query = json.load(query_json)
     query = pd.DataFrame([query])
     query_category = query['category'][0]
-    #query_sort = query['sort'][0]
+    #query_sort = query['sort_criteria'][0]
 
-    # connect = pymysql.connect(db='musinsaDB', user='root', password='MUSINSA_Lens_1', host='43.201.176.97', port='3306', charset='utf8', cursorclass=pymysql.cursors.DictCursor)
-    # cur = connect.cursor()
+    #connect = pymysql.connect(db='musinsaDB', user='root', password='MUSINSA_Lens_1', host='43.201.176.97', port='3306', charset='utf8', cursorclass=pymysql.cursors.DictCursor)
+    #cur = connect.cursor()
     
-    # #category limit
-    # sql = "SELECT itemName, itemStyle FROM musinsaDB where itemStyle = query_category"
-    # cur.execute(sql)
+    #category limit
+    #sql = "SELECT image_path, category FROM musinsaDB WHERE category = query_category"
+    #cur.execute(sql)
 
-    # db_result = cur.fetchall()
-    # data_category = pd.DataFrame(db_result)
+    #db_result = cur.fetchall()
+    #data_category = pd.DataFrame(db_result)
 
     db = database()
     data = db.get_data()
@@ -519,20 +518,35 @@ if __name__ == "__main__":
         print(mthd)
 
         samples = getattr(feature_extract_methods[mthd](), "make_samples")(data_category, query_category)
-    
-        # img_path = [item['img'] for item in samples]
-        # hists = [item['hist'] for item in samples]
 
-        # img_hists = {'img': img_path, 'hists': hists}
+        hists = [sample['hist'] for sample in samples]
 
-        # query = hists[0]
+        hists = [hist.astype(np.float32) for hist in hists]
 
-        # query = query.astype(np.float32)
-        # hists = [hist.astype(np.float32) for hist in hists]
+        fin_result = pd.DataFrame({'img':[sample['img'] for sample in samples],
+                                    'hist': hists})
+        
+        print(fin_result)
+        ret_list = []
 
-        # method = cv2.HISTCMP_BHATTACHARYYA
-
-        # for i, histogram in enumerate(hists):
-        #     ret = cv2.compareHist(query, histogram, method)
-        #     print("img%d :%7.2f" % (i + 1, ret), end='\t')
+        for i, histogram in enumerate(fin_result['hist']):
+            ret = cv2.compareHist(fin_result.iloc[0]['hist'], histogram, cv2.HISTCMP_BHATTACHARYYA)
+            ret_list.append(ret)
+            # print("img%d :%7.2f" % (i + 1, ret), end='\t')
         # print()
+
+        fin_result['ret'] = ret_list
+
+        fin_result = fin_result.sort_values(by='ret')
+        fin_result = fin_result[fin_result['ret'] != 0]
+
+        #sorted_image_path = fin_result['img']
+        #placeholders = ', '.join(['%s'] * len(sorted_sample))
+
+        #sql = f"SELECT name, brand, price, image_url, image_path FROM musinsaDB WHERE image_path IN ({placeholders})"
+        
+        #cur.execute(sql, tuple(sorted_sample))
+
+        #result = cur.fetchall()
+
+        #son_result = json.dumps(result, ensure_ascii=False)
